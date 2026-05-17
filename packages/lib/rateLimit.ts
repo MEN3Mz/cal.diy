@@ -29,19 +29,26 @@ export type RateLimitHelper = {
 export const API_KEY_RATE_LIMIT = 30;
 
 let warned = false;
+const rateLimitFailClosedResponse = {
+  success: false,
+  limit: 10,
+  remaining: 0,
+  reset: 0,
+} as RatelimitResponse;
 
 export function rateLimiter() {
   const { UNKEY_ROOT_KEY } = process.env;
+  
 
   if (!UNKEY_ROOT_KEY) {
     if (!warned) {
       log.warn("Disabled because the UNKEY_ROOT_KEY environment variable was not found.");
       warned = true;
     }
-    return () => ({ success: true, limit: 10, remaining: 999, reset: 0 }) as RatelimitResponse;
+    return () => rateLimitFailClosedResponse;
   }
   const timeout = {
-    fallback: { success: true, limit: 10, remaining: 999, reset: 0 },
+    fallback: rateLimitFailClosedResponse,
     ms: 5000,
   };
 
@@ -52,7 +59,7 @@ export function rateLimiter() {
       identifier,
       timestamp: new Date().toISOString(),
     });
-    return { success: true, limit: 10, remaining: 999, reset: 0 };
+    return rateLimitFailClosedResponse;
   };
 
   const limiter = {
@@ -132,3 +139,5 @@ export function rateLimiter() {
 
   return rateLimit;
 }
+
+how about now ?
